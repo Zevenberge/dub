@@ -603,6 +603,7 @@ class Dub {
 			logInfo("Resolved %s.", p);
 		}
 		taskPool.stop();
+		logInfo("Completed fetching of packages.");
 
 		string[] missingDependenciesBeforeReinit = m_project.missingDependencies;
 		m_project.reinit();

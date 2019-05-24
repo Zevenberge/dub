@@ -326,6 +326,7 @@ class Project {
 	/// Reloads dependencies.
 	void reinit()
 	{
+		logInfo("Reloading dependencies for %s", m_rootPackage.name);
 		m_dependencies = null;
 		m_missingDependencies = [];
 		m_packageManager.refresh(false);
@@ -411,8 +412,11 @@ class Project {
 				//enforce(p !is null, "Failed to resolve dependency "~dep.name~" "~vspec.toString());
 			}
 		}
+		logInfo("Collecting dependencies for %s", m_rootPackage.name);
 		collectDependenciesRec(m_rootPackage);
+		logInfo("Sorting dependencies for %s", m_rootPackage.name);
 		m_missingDependencies.sort();
+		logInfo("Done reloading dependencies for %s", m_rootPackage.name);
 	}
 
 	/// Returns the name of the root package.
