@@ -560,16 +560,20 @@ class Dub {
 		// Avoid being blocked by a slow download (even on a single-threaded machines)
         auto taskPool = new TaskPool(totalCPUs.clamp(3, 6));
 		foreach (p; taskPool.parallel(versions.byKey, 1)) {
+			logInfo("Resolving package %s", p);
 			auto ver = versions[p]; // Workaround for DMD 2.070.0 AA issue (crashes in aaApply2 if iterating by key+value)
+			logInfo("Trying to find version %s of %s", ver, p);
 			assert(!p.canFind(":"), "Resolved packages contain a sub package!?: "~p);
 			Package pack;
 			if (!ver.path.empty) {
+				logInfo("Trying to find %s locally", p);
 				try pack = m_packageManager.getOrLoadPackage(ver.path);
 				catch (Exception e) {
 					logDebug("Failed to load path based selection: %s", e.toString().sanitize);
 					continue;
 				}
 			} else {
+				logInfo("Trying to find %s remotely", p);
 				pack = m_packageManager.getBestPackage(p, ver);
 				if (pack && m_packageManager.isManagedPackage(pack)
 					&& ver.version_.isBranch && (options & UpgradeOptions.upgrade) != 0)
@@ -583,7 +587,11 @@ class Dub {
 
 			FetchOptions fetchOpts;
 			fetchOpts |= (options & UpgradeOptions.preRelease) != 0 ? FetchOptions.usePrerelease : FetchOptions.none;
-			if (!pack) fetch(p, ver, defaultPlacementLocation, fetchOpts, "getting selected version");
+			if (!pack) {
+				fetch(p, ver, defaultPlacementLocation, fetchOpts, "getting selected version");
+			} else {
+				logInfo("Already found %s, skipping fetch.", p);
+			}
 			if ((options & UpgradeOptions.select) && p != m_project.rootPackage.name) {
 				if (ver.path.empty) m_project.selections.selectVersion(p, ver.version_);
 				else {
@@ -592,6 +600,7 @@ class Dub {
 					m_project.selections.selectVersion(p, relpath);
 				}
 			}
+			logInfo("Resolved %s.", p);
 		}
 		taskPool.stop();
 
@@ -799,6 +808,7 @@ class Dub {
 	/// Fetches the package matching the dependency and places it in the specified location.
 	Package fetch(string packageId, const Dependency dep, PlacementLocation location, FetchOptions options, string reason = "")
 	{
+		logInfo("Fething package %s", packageId);
 		Json pinfo;
 		PackageSupplier supplier;
 		foreach(ps; m_packageSuppliers){
