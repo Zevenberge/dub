@@ -156,8 +156,13 @@ class Project {
 
 				foreach (d; deps) {
 					auto dependency = getDependency(d.name, true);
-					assert(dependency || d.spec.optional,
-						format("Non-optional dependency %s of %s not found in dependency tree!?.", d.name, p.name));
+					if(!dependency && !d.spec.optional){
+						logInfo("Could not find dependency %s of %s, but did find %s", 
+							d.name, p.name, m_dependencies);
+						assert(false, 
+							format("Non-optional dependency %s of %s not found in dependency tree!?.", 
+								d.name, p.name));
+					}
 					if(dependency) perform_rec(dependency);
 					if( ret ) return;
 				}
@@ -183,6 +188,7 @@ class Project {
 	*/
 	inout(Package) getDependency(string name, bool is_optional)
 	inout {
+		logInfo("Searching for dependency %s", name);
 		foreach(dp; m_dependencies)
 			if( dp.name == name )
 				return dp;
