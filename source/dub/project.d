@@ -334,7 +334,7 @@ class Project {
 		void collectDependenciesRec(Package pack, int depth = 0)
 		{
 			auto indent = replicate("  ", depth);
-			logDebug("%sCollecting dependencies for %s", indent, pack.name);
+			logInfo("%sCollecting dependencies for %s", indent, pack.name);
 			indent ~= "  ";
 
 			foreach (dep; pack.getAllDependencies()) {
@@ -355,7 +355,7 @@ class Project {
 					vspec = Dependency(m_rootPackage.version_);
 					try p = m_packageManager.getSubPackage(m_rootPackage.basePackage, subname, false);
 					catch (Exception e) {
-						logDiagnostic("%sError getting sub package %s: %s", indent, dep.name, e.msg);
+						logInfo("%sError getting sub package %s: %s", indent, dep.name, e.msg);
 						if (is_desired) m_missingDependencies ~= dep.name;
 						continue;
 					}
@@ -375,14 +375,14 @@ class Project {
 					if (subname.length) p = m_packageManager.getSubPackage(bp, subname, false);
 					else p = bp;
 				} else {
-					logDiagnostic("%sVersion selection for dependency %s (%s) of %s is missing.",
+					logInfo("%sVersion selection for dependency %s (%s) of %s is missing.",
 						indent, basename, dep.name, pack.name);
 				}
 
 				if (!p && !vspec.path.empty) {
 					NativePath path = vspec.path;
 					if (!path.absolute) path = pack.path ~ path;
-					logDiagnostic("%sAdding local %s in %s", indent, dep.name, path);
+					logInfo("%sAdding local %s in %s", indent, dep.name, path);
 					p = m_packageManager.getOrLoadPackage(path, NativePath.init, true);
 					if (p.parentPackage !is null) {
 						logWarn("%sSub package %s must be referenced using the path to it's parent package.", indent, dep.name);
@@ -395,13 +395,13 @@ class Project {
 				}
 
 				if (!p) {
-					logDiagnostic("%sMissing dependency %s %s of %s", indent, dep.name, vspec, pack.name);
+					logInfo("%sMissing dependency %s %s of %s", indent, dep.name, vspec, pack.name);
 					if (is_desired) m_missingDependencies ~= dep.name;
 					continue;
 				}
 
 				if (!m_dependencies.canFind(p)) {
-					logDiagnostic("%sFound dependency %s %s", indent, dep.name, vspec.toString());
+					logInfo("%sFound dependency %s %s", indent, dep.name, vspec.toString());
 					m_dependencies ~= p;
 					if (basename == m_rootPackage.basePackage.name)
 						p.warnOnSpecialCompilerFlags();

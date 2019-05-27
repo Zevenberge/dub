@@ -609,16 +609,22 @@ class Dub {
 		m_project.reinit();
 
 		if (!m_project.hasAllDependencies) {
+			logInfo("Project does not have all the dependencies");
 			auto resolvedDependencies = setDifference(
 					assumeSorted(missingDependenciesBeforeReinit),
 					assumeSorted(m_project.missingDependencies)
 				);
-			if (!resolvedDependencies.empty)
+			if (!resolvedDependencies.empty) {
+				logInfo("Upgrading dependencies");
 				upgrade(options, m_project.missingDependencies);
+				logInfo("Upgraded after resolved dependencies weren't empty");
+			}
 		}
 
-		if ((options & UpgradeOptions.select) && !(options & (UpgradeOptions.noSaveSelections | UpgradeOptions.dryRun)))
+		if ((options & UpgradeOptions.select) && !(options & (UpgradeOptions.noSaveSelections | UpgradeOptions.dryRun))) {
+			logInfo("Saving selections");
 			m_project.saveSelections();
+		}
 	}
 
 	/** Generate project files for a specified generator.
