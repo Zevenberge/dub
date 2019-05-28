@@ -18,5 +18,5 @@ if [ -f dub.sdl ]; then
 fi
 
 if [ "$RESULT" != "$EXPECTED" ]; then
-	die $LINENO 'Unexpected SDLang output.'
+	echo $LINENO 'Unexpected SDLang output.'
 fi
